@@ -390,21 +390,21 @@ function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 
 function api(path,opts){
   opts=opts||{};
-  opts.headers=Object.assign({
-    "apikey":SUPA_KEY,
-    "Authorization":"Bearer "+SUPA_KEY,
-    "Content-Type":"application/json",
-    "Prefer":opts.prefer||"return=minimal"
-  },opts.headers||{});
-  return fetch(SUPA_URL+"/rest/v1/"+path,opts);
+  var h={"apikey":SUPA_KEY,"Content-Type":"application/json"};
+  if(opts.method&&opts.method!=="GET")h["Prefer"]="return=minimal";
+  opts.headers=Object.assign(h,opts.headers||{});
+  var ac=new AbortController();
+  var timer=setTimeout(function(){ac.abort()},8000);
+  opts.signal=ac.signal;
+  return fetch(SUPA_URL+"/rest/v1/"+path,opts).finally(function(){clearTimeout(timer)});
 }
 
 async function load(){
   try{
-    var r=await api("shopping_items?select=*&order=created_at.asc",{method:"GET",prefer:"count=none"});
-    if(!r.ok)throw new Error("HTTP "+r.status);
+    var r=await api("shopping_items?select=*&order=created_at.asc",{method:"GET"});
+    if(!r.ok){var t="";try{t=(await r.text()).slice(0,200)}catch(_){}throw new Error("HTTP "+r.status+" "+t)}
     items=await r.json();lastErr="";
-  }catch(e){lastErr="Can't reach the list right now. It'll retry."}
+  }catch(e){lastErr="Database error \u2014 "+(e&&e.message?e.message:String(e))}
   renderShop();
 }
 
