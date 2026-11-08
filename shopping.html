@@ -48,9 +48,18 @@
 var SUPA_URL="https://uarnkmukrmilcrsxcyvz.supabase.co";
 var SUPA_KEY="sb_publishable_H8EzjJz5Aiu0Bk_QYI8Qcg_2zyqGnQg";
 
-/* existing database columns are reused, so nothing had to be migrated:
-   status 'arrived' = bought, 'to_buy' = still needed, who = buyer */
-var BOUGHT="arrived", NEEDED="to_buy";
+/* Two visible states: Not purchased / Purchased.
+   status 'to_buy' = not purchased. Ticking saves 'bought' (+ who = buyer).
+   Older statuses 'ordered', 'bringing', 'arrived' also count as purchased,
+   keep their own label, and are never rewritten unless someone deliberately unticks them. */
+var BOUGHT="bought", NEEDED="to_buy";
+var DETAIL={ordered:"Ordered", bringing:"Bringing it", arrived:"Arrived"};
+function isGot(i){ return !!i && i.status!==NEEDED; }
+function nice(d){ try{ return new Date(d+"T12:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short"}); }catch(e){ return d; } }
+function oops(r){
+  if(denied(r)){ lockOut(); return; }
+  if(r && !r.ok){ err="That change didn't save (HTTP "+r.status+"). Please try again."; }
+}
 
 var area=document.getElementById("area");
 var items=[], filter="all", me="", askId=null, painted=false, err="", poll=null;
@@ -60,22 +69,35 @@ function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 
-function api(path,opts){
-  opts=opts||{};
-  var h={"apikey":SUPA_KEY,"Content-Type":"application/json"};
-  if(opts.method&&opts.method!=="GET")h["Prefer"]="return=minimal";
-  opts.headers=Object.assign(h,opts.headers||{});
+/* Private family list: the family link (…/shopping.html#family=CODE) is opened once,
+   the code is kept on this phone, and every read/write sends it to the database,
+   which checks it on the server. Without a valid code nothing can be seen or changed. */
+var FAM=null, locked=false;
+(function(){
+  var m=(location.hash||"").match(/family=([A-Za-z0-9_-]{20,})/);
+  if(m){ FAM=m[1]; lsSet("hatchFamily",FAM);
+    try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){} }
+  else FAM=lsGet("hatchFamily")||null;
+})();
+
+function rpc(fn,args){
+  var body=Object.assign({p_code:FAM},args||{});
   var ac=new AbortController(), t=setTimeout(function(){ac.abort()},8000);
-  opts.signal=ac.signal;
-  return fetch(SUPA_URL+"/rest/v1/"+path,opts)["finally"](function(){clearTimeout(t)});
+  return fetch(SUPA_URL+"/rest/v1/rpc/"+fn,{method:"POST",signal:ac.signal,
+    headers:{"apikey":SUPA_KEY,"Content-Type":"application/json"},body:JSON.stringify(body)})
+    ["finally"](function(){clearTimeout(t)});
 }
+function denied(r){ return r && (r.status===401||r.status===403); }
+function lockOut(){ locked=true; FAM=null; lsSet("hatchFamily",""); if(poll){clearInterval(poll);poll=null;} }
 
 async function load(){
+  if(!FAM){ locked=true; render(); return; }
   try{
-    var r=await api("shopping_items?select=*&order=created_at.asc",{method:"GET"});
+    var r=await rpc("hatch_list");
+    if(denied(r)){ lockOut(); render(); return; }
     if(!r.ok){var t="";try{t=(await r.text()).slice(0,160)}catch(_){ }
       throw new Error("HTTP "+r.status+" "+t);}
-    items=await r.json(); err="";
+    items=await r.json(); err=""; locked=false;
   }catch(e){ err="Can't reach the list — "+(e&&e.message?e.message:String(e)); }
   render();
 }
@@ -85,7 +107,7 @@ async function add(name){
     err="“"+n+"” is already on the list."; render(); return;
   }
   err=""; items.push({id:"tmp"+Date.now(),name:n,status:NEEDED,who:null}); render();
-  try{ await api("shopping_items",{method:"POST",body:JSON.stringify({name:n,status:NEEDED})}); }catch(e){}
+  try{ oops(await rpc("hatch_add",{p_name:n})); }catch(e){}
   load();
 }
 async function save(id,fields){
@@ -93,29 +115,36 @@ async function save(id,fields){
   if(it) Object.keys(fields).forEach(function(k){it[k]=fields[k];});
   render();
   var body={}; Object.keys(fields).forEach(function(k){body[k]=fields[k]===""?null:fields[k];});
-  try{ await api("shopping_items?id=eq."+encodeURIComponent(id),{method:"PATCH",body:JSON.stringify(body)}); }catch(e){}
+  try{ oops(await rpc("hatch_update",{p_id:id,p_changes:body})); }catch(e){}
   load();
 }
 async function kill(id){
   items=items.filter(function(i){return i.id!==id;}); render();
-  try{ await api("shopping_items?id=eq."+encodeURIComponent(id),{method:"DELETE"}); }catch(e){}
+  try{ oops(await rpc("hatch_delete",{p_id:id})); }catch(e){}
   load();
 }
 function toggle(id){
   var it=items.find(function(i){return i.id===id;}); if(!it) return;
-  if(it.status===BOUGHT){ save(id,{status:NEEDED,who:null}); return; }
+  if(isGot(it)){
+    if(DETAIL[it.status] && !confirm("“"+it.name+"” is marked as "+DETAIL[it.status].toLowerCase()+". Mark it as not purchased?")) return;
+    save(id,{status:NEEDED,who:null}); return;
+  }
   if(me){ save(id,{status:BOUGHT,who:me}); return; }
   askId=id; render();                        // no name on this phone yet — ask inline
 }
 
 function row(i){
-  var got=i.status===BOUGHT;
-  var line=got ? "Bought by "+esc(i.who||"someone") : "Not yet purchased";
+  var got=isGot(i), line;
+  if(!got) line="Not purchased";
+  else if(DETAIL[i.status]) line="Purchased · "+DETAIL[i.status]+
+      (i.who?" ("+esc(i.who)+")":"")+
+      (i.status==="ordered"&&i.due_date?" · due "+esc(nice(i.due_date)):"");
+  else line="Purchased by "+esc(i.who||"someone");
   var ask = (askId===i.id) ?
     '<div class="namebox"><input id="who-'+esc(i.id)+'" placeholder="Your name" autocomplete="given-name" maxlength="40">'+
     '<button class="btn small" data-save="'+esc(i.id)+'">Save</button></div>' : "";
   return '<div class="sitem'+(got?" got":"")+'">'+
-      '<button class="mark" data-tog="'+esc(i.id)+'" aria-label="'+(got?"Mark as not bought":"Mark as bought")+'">'+
+      '<button class="mark" data-tog="'+esc(i.id)+'" aria-label="'+(got?"Mark as not purchased":"Mark as purchased")+'">'+
         '<svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></button>'+
       '<span class="txt"><span class="nm">'+esc(i.name)+'</span>'+
         '<span class="st">'+line+(got?' <button data-edit="'+esc(i.id)+'" style="background:none;border:0;color:inherit;text-decoration:underline;padding:0;font-size:inherit">change</button>':'')+'</span>'+
@@ -128,9 +157,14 @@ function row(i){
 function render(){
   var a=document.activeElement;
   if(painted && a && a.closest && a.closest("#area") && a.tagName==="INPUT") return;
+  if(locked){
+    area.innerHTML='<div class="warn">This list is private to the family.</div>'+
+      '<p class="empty">Open the family link (it\'s in the family chat) on this phone and the list will appear. You only need to do it once.</p>';
+    painted=true; return;
+  }
 
-  var bought=items.filter(function(i){return i.status===BOUGHT;});
-  var need  =items.filter(function(i){return i.status!==BOUGHT;});
+  var bought=items.filter(isGot);
+  var need  =items.filter(function(i){return !isGot(i);});
   var shown = filter==="bought" ? bought : filter==="need" ? need : bought.concat(need);
 
   var html="";
@@ -142,9 +176,9 @@ function render(){
   html+='<div class="filters">'+
         '<button data-f="all" aria-pressed="'+(filter==="all")+'">All</button>'+
         '<button data-f="bought" aria-pressed="'+(filter==="bought")+'">Purchased</button>'+
-        '<button data-f="need" aria-pressed="'+(filter==="need")+'">Still needed</button></div>';
+        '<button data-f="need" aria-pressed="'+(filter==="need")+'">Not purchased</button></div>';
   html+='<p class="totals"><span><b>'+bought.length+'</b> purchased</span>'+
-        '<span><b>'+need.length+'</b> still needed</span>'+
+        '<span><b>'+need.length+'</b> not purchased</span>'+
         '<span><b>'+items.length+'</b> total</span></p>';
   html+= shown.length ? '<div class="slist">'+shown.map(row).join("")+'</div>'
        : '<p class="empty">'+(items.length?'Nothing in this filter.':'Nothing on the list yet — add the first thing above.')+'</p>';
@@ -173,7 +207,8 @@ function render(){
   area.querySelectorAll("[data-save]").forEach(function(b){b.onclick=function(){
     var inp=document.getElementById("who-"+b.dataset.save); var v=(inp&&inp.value||"").trim();
     if(!v) return; me=v; lsSet("hatchWho",v); var id=b.dataset.save; askId=null;
-    save(id,{status:BOUGHT,who:v});
+    var it=items.find(function(i){return i.id===id;});
+    save(id, isGot(it) ? {who:v} : {status:BOUGHT,who:v});   // renaming the buyer never rewrites an older status
   };});
   painted=true;
 }
