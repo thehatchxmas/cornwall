@@ -384,6 +384,8 @@ var ARRIVING=[["","How?"],["delivery","Delivery"],["family","Brought by family"]
 
 var shopArea=document.getElementById("shop-area");
 var items=[],filter="all",unlocked=false,poll=null,lastErr="",painted=false;
+var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
+
 
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
