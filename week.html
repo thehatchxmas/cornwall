@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Our Week · The Hatch</title>
+<meta name="theme-color" content="#173C2D">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Karla:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="index.html">The <span>Hatch</span></a>
+    <nav class="desknav">
+      <a href="index.html">Home</a>
+      <a href="week.html" aria-current="page">Our Week</a>
+      <a href="shopping.html">Shopping</a>
+      <a href="house.html">The House</a>
+      <a href="bedrooms.html">Bedrooms</a>
+    </nav>
+    <span class="sprig">Crantock</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="eyebrow">21 – 28 December</p>
+  <h1 class="page">Our Week</h1>
+  <p class="sub">Green means it's happening. Gold means it's an idea we haven't settled.</p>
+
+  <div id="days"></div>
+
+  <section class="blk">
+    <h2>Still up for grabs</h2>
+    <p class="lead">Not tied to a day. Have a look and say what you fancy in the WhatsApp group.</p>
+    <div class="ideas" id="ideas"></div>
+  </section>
+</main>
+
+<footer>Merry Christmas<small>See you all in Crantock</small></footer>
+
+<nav class="tabs">
+  <a href="index.html"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>Home</a>
+  <a href="week.html" aria-current="page"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/></svg>Week</a>
+  <a href="shopping.html"><svg viewBox="0 0 24 24"><path d="M3 4h2l2.4 11.4a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6"/><circle cx="10" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>Shopping</a>
+  <a href="house.html"><svg viewBox="0 0 24 24"><path d="M4 21V8l8-5 8 5v13"/><path d="M9 21v-6h6v6"/></svg>House</a>
+  <a href="bedrooms.html"><svg viewBox="0 0 24 24"><path d="M3 18v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6"/><path d="M3 18h18M7 10V7a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v3"/></svg>Beds</a>
+</nav>
+
+<script>
+var L=function(u,t){return '<a href="'+u+'" target="_blank" rel="noopener">'+t+'</a>';};
+var DAYS=[
+ ["Mon","21","Arrivals","plan","Doors open at 4pm. Food shop, a first look at the beach, and dinner at the house.",""],
+ ["Tue","22","Eden Project","plan","Christmas in the biomes, Father Christmas, ice skating, and the lights after 4pm. About 35–45 minutes. "+L("https://www.edenproject.com/visit/whats-on/christmas-at-the-eden-project","What's on"),""],
+ ["Wed","23","Truro","idea","Christmas market until 9pm, then the Festival of Nine Lessons and Carols at the cathedral, where the service began. 25–35 minutes. "+L("https://www.trurochristmas.co.uk/","Market")+" · "+L("https://www.trurocathedral.org.uk/history/nine-lessons-and-carols","Carols"),"Or swap the day for Mousehole — Tom Bawcock's Eve falls on the 23rd and only the 23rd."],
+ ["Thu","24","Christmas Eve","idea","Panto in Truro — Dick Whittington &amp; His Mousehole Cat, 11am or 3pm. "+L("https://www.hallforcornwall.co.uk/whats-on/dickwhittington/","Hall for Cornwall"),"Or keep it local: beach walk and a pub lunch."],
+ ["Fri","25","Christmas Day","plan","The house, far too much food, and a long beach walk. There's a sea swim at Watergate Bay around midday for anyone brave enough.",""],
+ ["Sat","26","Boxing Day","plan","Heligan Night Garden — a mile of lantern trail through the Lost Gardens, with fire pits, marshmallows and mulled wine. Slots from 4:15pm, 40–50 minutes away. "+L("https://www.heligan.com/events-at-heligan/heligan-night-garden/","Tickets"),"Perranporth swim is 10:30 the same morning, fifteen minutes away. Both fit."],
+ ["Sun","27","Lunch at St Enodoc","plan","Paul Ainsworth's place in Rock, across the estuary from Padstow, about 45 minutes. Bookings by phone only, on 01208 863394.",""],
+ ["Mon","28","Departures","plan","Out by 10am, so most of the packing happens the night before.",""]
+];
+document.getElementById("days").innerHTML=DAYS.map(function(d){
+  var chip = d[3]==="plan" ? '<span class="chip plan">Planned</span>' : '<span class="chip idea">Idea</span>';
+  var extra = d[5] ? '<p style="color:var(--gold);font-weight:500">'+d[5]+'</p>' : '';
+  return '<div class="day'+(d[1]==="25"?" xmas":"")+'">'+
+    '<div class="d"><b>'+d[1]+'</b><span>'+d[0]+'</span></div>'+
+    '<div><h3>'+d[2]+chip+'</h3><p>'+d[4]+'</p>'+extra+'</div></div>';
+}).join("");
+
+var IDEAS=[
+ ["Tom Bawcock's Eve, Mousehole","23 December only. Lantern procession round the harbour, stargazy pie, and the harbour lights lit. 75 minutes each way and a late one for the little ones."],
+ ["Mousehole harbour lights","Lights right round the harbour, on all week. An evening out rather than a pop over."],
+ ["Perranporth Boxing Day swim","10:30, no wetsuits, the biggest of the Cornish swims. Fifteen minutes away, spectators welcome."],
+ ["Carols at Crantock church","St Carantoc's is a five-minute walk. Dates aren't published, so someone needs to ring."],
+ ["Carols on the Platt, Port Isaac","Half the village singing on the harbour front. About 45 minutes."],
+ ["Santa by steam, Bodmin &amp; Wenford","Heritage steam train with Father Christmas, roughly 35 minutes. 2026 dates weren't out last time we looked."],
+ ["Beach walks","Watergate Bay, Crantock and the Gannel, Holywell Bay, Fistral and Pentire Head, or out to Padstow and Port Isaac."],
+ ["The Bowgie Inn","Straight above Crantock Beach. Children's menu and gluten-free options — the easy one."],
+ ["Smugglers Den Inn","Thatched sixteenth-century pub near Cubert, 15–20 minutes. Good with children."],
+ ["Lewinnick Lodge","Cliff-top with big sea views, 10–20 minutes."],
+ ["The Tartan Fox","Michelin-listed country pub, 15–25 minutes. Could be the Christmas Eve lunch."],
+ ["St Kew Inn","Fifteenth-century pub with open fires, 40–50 minutes. Combine with Port Isaac."]
+];
+document.getElementById("ideas").innerHTML=IDEAS.map(function(i){
+  return '<div class="i"><b>'+i[0]+'</b><p>'+i[1]+'</p></div>';
+}).join("");
+</script>
+</body>
+</html>

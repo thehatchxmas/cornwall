@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shopping · The Hatch</title>
+<meta name="theme-color" content="#173C2D">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Karla:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="index.html">The <span>Hatch</span></a>
+    <nav class="desknav">
+      <a href="index.html">Home</a>
+      <a href="week.html">Our Week</a>
+      <a href="shopping.html" aria-current="page">Shopping</a>
+      <a href="house.html">The House</a>
+      <a href="bedrooms.html">Bedrooms</a>
+    </nav>
+    <span class="sprig">Crantock</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="eyebrow">Together</p>
+  <h1 class="page">Shopping</h1>
+  <p class="sub">Add anything we need. Tap the circle when you've bought it and it'll say who.</p>
+  <div id="area"><p class="empty">Loading…</p></div>
+</main>
+
+<footer>Merry Christmas<small>See you all in Crantock</small></footer>
+
+<nav class="tabs">
+  <a href="index.html"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>Home</a>
+  <a href="week.html"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/></svg>Week</a>
+  <a href="shopping.html" aria-current="page"><svg viewBox="0 0 24 24"><path d="M3 4h2l2.4 11.4a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6"/><circle cx="10" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>Shopping</a>
+  <a href="house.html"><svg viewBox="0 0 24 24"><path d="M4 21V8l8-5 8 5v13"/><path d="M9 21v-6h6v6"/></svg>House</a>
+  <a href="bedrooms.html"><svg viewBox="0 0 24 24"><path d="M3 18v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6"/><path d="M3 18h18M7 10V7a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v3"/></svg>Beds</a>
+</nav>
+
+<script>
+/* ---------------- shared list ---------------- */
+var SUPA_URL="https://uarnkmukrmilcrsxcyvz.supabase.co";
+var SUPA_KEY="sb_publishable_H8EzjJz5Aiu0Bk_QYI8Qcg_2zyqGnQg";
+
+/* existing database columns are reused, so nothing had to be migrated:
+   status 'arrived' = bought, 'to_buy' = still needed, who = buyer */
+var BOUGHT="arrived", NEEDED="to_buy";
+
+var area=document.getElementById("area");
+var items=[], filter="all", me="", askId=null, painted=false, err="", poll=null;
+
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+
+function api(path,opts){
+  opts=opts||{};
+  var h={"apikey":SUPA_KEY,"Content-Type":"application/json"};
+  if(opts.method&&opts.method!=="GET")h["Prefer"]="return=minimal";
+  opts.headers=Object.assign(h,opts.headers||{});
+  var ac=new AbortController(), t=setTimeout(function(){ac.abort()},8000);
+  opts.signal=ac.signal;
+  return fetch(SUPA_URL+"/rest/v1/"+path,opts)["finally"](function(){clearTimeout(t)});
+}
+
+async function load(){
+  try{
+    var r=await api("shopping_items?select=*&order=created_at.asc",{method:"GET"});
+    if(!r.ok){var t="";try{t=(await r.text()).slice(0,160)}catch(_){ }
+      throw new Error("HTTP "+r.status+" "+t);}
+    items=await r.json(); err="";
+  }catch(e){ err="Can't reach the list — "+(e&&e.message?e.message:String(e)); }
+  render();
+}
+async function add(name){
+  var n=(name||"").trim(); if(!n) return;
+  if(items.some(function(i){return (i.name||"").trim().toLowerCase()===n.toLowerCase();})){
+    err="“"+n+"” is already on the list."; render(); return;
+  }
+  err=""; items.push({id:"tmp"+Date.now(),name:n,status:NEEDED,who:null}); render();
+  try{ await api("shopping_items",{method:"POST",body:JSON.stringify({name:n,status:NEEDED})}); }catch(e){}
+  load();
+}
+async function save(id,fields){
+  var it=items.find(function(i){return i.id===id;});
+  if(it) Object.keys(fields).forEach(function(k){it[k]=fields[k];});
+  render();
+  var body={}; Object.keys(fields).forEach(function(k){body[k]=fields[k]===""?null:fields[k];});
+  try{ await api("shopping_items?id=eq."+encodeURIComponent(id),{method:"PATCH",body:JSON.stringify(body)}); }catch(e){}
+  load();
+}
+async function kill(id){
+  items=items.filter(function(i){return i.id!==id;}); render();
+  try{ await api("shopping_items?id=eq."+encodeURIComponent(id),{method:"DELETE"}); }catch(e){}
+  load();
+}
+function toggle(id){
+  var it=items.find(function(i){return i.id===id;}); if(!it) return;
+  if(it.status===BOUGHT){ save(id,{status:NEEDED,who:null}); return; }
+  if(me){ save(id,{status:BOUGHT,who:me}); return; }
+  askId=id; render();                        // no name on this phone yet — ask inline
+}
+
+function row(i){
+  var got=i.status===BOUGHT;
+  var line=got ? "Bought by "+esc(i.who||"someone") : "Not yet purchased";
+  var ask = (askId===i.id) ?
+    '<div class="namebox"><input id="who-'+esc(i.id)+'" placeholder="Your name" autocomplete="given-name" maxlength="40">'+
+    '<button class="btn small" data-save="'+esc(i.id)+'">Save</button></div>' : "";
+  return '<div class="sitem'+(got?" got":"")+'">'+
+      '<button class="mark" data-tog="'+esc(i.id)+'" aria-label="'+(got?"Mark as not bought":"Mark as bought")+'">'+
+        '<svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></button>'+
+      '<span class="txt"><span class="nm">'+esc(i.name)+'</span>'+
+        '<span class="st">'+line+(got?' <button data-edit="'+esc(i.id)+'" style="background:none;border:0;color:inherit;text-decoration:underline;padding:0;font-size:inherit">change</button>':'')+'</span>'+
+        ask+
+      '</span>'+
+      '<button class="kill" data-kill="'+esc(i.id)+'" aria-label="Remove">×</button>'+
+    '</div>';
+}
+
+function render(){
+  var a=document.activeElement;
+  if(painted && a && a.closest && a.closest("#area") && a.tagName==="INPUT") return;
+
+  var bought=items.filter(function(i){return i.status===BOUGHT;});
+  var need  =items.filter(function(i){return i.status!==BOUGHT;});
+  var shown = filter==="bought" ? bought : filter==="need" ? need : bought.concat(need);
+
+  var html="";
+  if(err) html+='<div class="warn">'+esc(err)+'</div>';
+  html+='<p class="me">'+(me?('You are <b>'+esc(me)+'</b>'):'No name set on this phone')+
+        ' <button id="setme">'+(me?'Change':'Set your name')+'</button></p>';
+  html+='<form class="addrow" id="af"><input id="ai" placeholder="Add an item…" maxlength="80" required autocomplete="off">'+
+        '<button class="btn" type="submit">Add</button></form>';
+  html+='<div class="filters">'+
+        '<button data-f="all" aria-pressed="'+(filter==="all")+'">All</button>'+
+        '<button data-f="bought" aria-pressed="'+(filter==="bought")+'">Purchased</button>'+
+        '<button data-f="need" aria-pressed="'+(filter==="need")+'">Still needed</button></div>';
+  html+='<p class="totals"><span><b>'+bought.length+'</b> purchased</span>'+
+        '<span><b>'+need.length+'</b> still needed</span>'+
+        '<span><b>'+items.length+'</b> total</span></p>';
+  html+= shown.length ? '<div class="slist">'+shown.map(row).join("")+'</div>'
+       : '<p class="empty">'+(items.length?'Nothing in this filter.':'Nothing on the list yet — add the first thing above.')+'</p>';
+  area.innerHTML=html;
+
+  document.getElementById("af").onsubmit=function(e){
+    e.preventDefault(); var el=document.getElementById("ai"); var v=el.value; el.value="";
+    try{el.blur()}catch(_){ } add(v);
+  };
+  document.getElementById("setme").onclick=function(){
+    me=""; lsSet("hatchWho",""); askId=null; render();
+    var f=document.querySelector(".filters"); if(f) f.scrollIntoView({block:"nearest"});
+    var box=document.createElement("div"); box.className="namebox";
+    box.innerHTML='<input id="meIn" placeholder="Your name" maxlength="40" autocomplete="given-name"><button class="btn small" id="meSave">Save</button>';
+    area.insertBefore(box, area.firstChild.nextSibling);
+    document.getElementById("meIn").focus();
+    document.getElementById("meSave").onclick=function(){
+      var v=document.getElementById("meIn").value.trim(); if(!v) return;
+      me=v; lsSet("hatchWho",v); render();
+    };
+  };
+  area.querySelectorAll("[data-f]").forEach(function(b){b.onclick=function(){filter=b.dataset.f;render();};});
+  area.querySelectorAll("[data-tog]").forEach(function(b){b.onclick=function(){toggle(b.dataset.tog);};});
+  area.querySelectorAll("[data-kill]").forEach(function(b){b.onclick=function(){kill(b.dataset.kill);};});
+  area.querySelectorAll("[data-edit]").forEach(function(b){b.onclick=function(){askId=b.dataset.edit;render();};});
+  area.querySelectorAll("[data-save]").forEach(function(b){b.onclick=function(){
+    var inp=document.getElementById("who-"+b.dataset.save); var v=(inp&&inp.value||"").trim();
+    if(!v) return; me=v; lsSet("hatchWho",v); var id=b.dataset.save; askId=null;
+    save(id,{status:BOUGHT,who:v});
+  };});
+  painted=true;
+}
+
+me=lsGet("hatchWho")||"";
+load();
+poll=setInterval(function(){ if(!document.hidden && askId===null) load(); },5000);
+</script>
+</body>
+</html>
