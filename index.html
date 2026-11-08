@@ -1,0 +1,505 @@
+<title>Christmas in Cornwall</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: dark spruce hero with falling snow and a string of lights, then a snow-white page of cards for the house, the week, the grouped ideas board and the jobs list. Fully static so it works for anyone with the link. */
+:root{
+  --bg:#f3f7f4;--card:#ffffff;--ink:#16301f;--mute:#566a5d;--line:#d7e3da;
+  --spruce:#0f3526;--spruce2:#1d5a41;--cran:#b3262e;--gold:#d9a441;
+  --accent:#1d5a41;--on-accent:#ffffff;--on-cran:#ffffff;--tint:#fbeeee;--hero-ink:#fbf6e9;
+  --display:"DM Serif Display",Georgia,serif;--body:"DM Sans",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b1d15;--card:#12291f;--ink:#f3efe4;--mute:#a3b8aa;--line:#23402f;
+  --spruce:#0a2a1e;--spruce2:#1d5a41;--cran:#ef6b6f;--gold:#e8b85a;
+  --accent:#3f9d72;--on-accent:#06150e;--on-cran:#2a0507;--tint:#2b1a1d;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b1d15;--card:#12291f;--ink:#f3efe4;--mute:#a3b8aa;--line:#23402f;
+  --spruce:#0a2a1e;--spruce2:#1d5a41;--cran:#ef6b6f;--gold:#e8b85a;
+  --accent:#3f9d72;--on-accent:#06150e;--on-cran:#2a0507;--tint:#2b1a1d;color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:calc(104px + env(safe-area-inset-top,0px))}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--body)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--spruce)}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;line-height:1.1;text-wrap:balance}
+.wrap{max-width:880px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+.hero{position:relative;overflow:hidden;background:radial-gradient(120% 90% at 50% 0%,var(--spruce2) 0%,var(--spruce) 62%);color:var(--hero-ink);padding-block:0 64px;text-align:center}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hero .wrap{position:relative}
+.lights{display:flex;justify-content:space-between;padding:10px 4px 0;position:relative;height:58px;overflow:hidden}
+.lights::before{content:"";position:absolute;left:-2%;right:-2%;top:6px;height:22px;border-bottom:2px solid rgba(251,246,233,.35);border-radius:0 0 50% 50%/0 0 100% 100%}
+.bulb{width:12px;height:18px;border-radius:50% 50% 55% 55%;margin-top:12px;position:relative;animation:glow 2.6s ease-in-out infinite}
+.bulb:nth-child(odd){margin-top:22px}
+.bulb::before{content:"";position:absolute;left:3px;top:-5px;width:6px;height:6px;background:rgba(251,246,233,.45);border-radius:1px}
+.b0{background:#ef5b60;color:#ef5b60}.b1{background:#f3c35c;color:#f3c35c}.b2{background:#5fd09a;color:#5fd09a}.b3{background:#8fd3ee;color:#8fd3ee}
+@keyframes glow{0%,100%{box-shadow:0 0 14px 2px currentColor;opacity:1}50%{box-shadow:0 0 3px 0 currentColor;opacity:.55}}
+.tag{display:inline-block;border:1px solid rgba(217,164,65,.7);color:var(--gold);padding:4px 16px;border-radius:99px;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;font-weight:500;margin-top:30px}
+.hero h1{font-size:clamp(2.6rem,10vw,4.8rem);margin-top:16px}
+.hero h1 em{font-style:italic;color:var(--gold)}
+.hero p.sub{margin:14px auto 0;max-width:34ch;opacity:.9;font-size:1.05rem}
+.count{display:inline-flex;align-items:baseline;gap:10px;margin-top:26px;padding:10px 22px;border-radius:14px;background:rgba(0,0,0,.28);border:1px solid rgba(251,246,233,.2)}
+.count b{font:400 2.1rem/1 var(--display);color:var(--gold);font-variant-numeric:tabular-nums}
+.count span{font-size:.92rem;opacity:.9}
+.hill{position:absolute;left:0;right:0;bottom:-1px;height:44px;background:var(--bg);clip-path:ellipse(58% 100% at 50% 100%)}
+
+.stick{position:sticky;top:env(safe-area-inset-top,0px);z-index:9}
+nav{background:var(--spruce);border-bottom:1px solid rgba(217,164,65,.35)}
+nav .wrap{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;padding-block:8px}
+nav a{color:var(--hero-ink);text-decoration:none;font-weight:500;font-size:.9rem;padding:6px 13px;border-radius:99px}
+nav a:hover{background:rgba(251,246,233,.14)}
+.ticker{background:var(--cran);color:var(--on-cran);overflow:hidden;border-bottom:2px solid var(--gold)}
+.ticker-in{display:flex;width:max-content;animation:roll 64s linear infinite}
+.ticker:hover .ticker-in,.ticker:focus-within .ticker-in{animation-play-state:paused}
+.ticker i{display:inline-flex;align-items:center;padding-block:9px;white-space:nowrap;font-size:.88rem;font-weight:500;font-style:normal}
+.ticker i::after{content:"\2726";margin:0 20px;opacity:.55}
+@keyframes roll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+a:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+main{padding-block:8px 56px}
+section{margin-top:44px}
+section>h2{font-size:clamp(1.8rem,5vw,2.3rem);margin-bottom:6px}
+.lede{color:var(--mute);margin:0 0 18px;max-width:62ch}
+.rule{display:flex;align-items:center;gap:10px;margin:10px 0 18px;color:var(--gold)}
+.rule::before,.rule::after{content:"";height:1px;flex:1;background:var(--line)}
+.rule svg{width:16px;height:16px;fill:currentColor;flex:none}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;min-width:0}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.k{font-size:.74rem;text-transform:uppercase;letter-spacing:.12em;color:var(--mute);font-weight:700;margin-bottom:6px}
+.card p{margin:0}.card p+p{margin-top:6px}
+.card ul{margin:4px 0 0;padding-left:18px}
+.card li{margin-top:3px}
+.who{font-size:.84rem;color:var(--mute);margin-top:8px}
+.who b{color:var(--ink);font-weight:700}
+
+.days{display:grid;gap:10px}
+.day{display:grid;grid-template-columns:76px 1fr;gap:16px;align-items:start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 18px;min-width:0}
+.d{text-align:center;border-right:1px solid var(--line);padding-right:14px}
+.d b{display:block;font:400 2.1rem/1 var(--display);color:var(--spruce2);font-variant-numeric:tabular-nums}
+.d span{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);font-weight:700}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .d b{color:var(--accent)}}
+:root[data-theme="dark"] .d b{color:var(--accent)}
+.day h3{font-size:1.25rem}
+.day p{margin:3px 0 0;color:var(--mute);font-size:.96rem}
+.day.eve .d b{color:var(--gold)}
+.day.xmas{background:var(--tint);border:2px solid var(--gold)}
+.day.xmas .d{border-color:var(--gold)}
+.day.xmas .d b{color:var(--cran)}
+.flag{display:inline-block;background:var(--cran);color:var(--on-cran);font:700 .68rem/1 var(--body);letter-spacing:.12em;text-transform:uppercase;padding:5px 9px;border-radius:99px;margin-left:8px;vertical-align:middle}
+.flag.book{background:transparent;color:var(--gold);border:1px solid var(--gold)}
+.day a,.idea a,.card a{color:var(--accent);text-decoration:underline;text-underline-offset:2px;font-weight:500}
+.cp{display:inline-flex;align-items:center;gap:7px;background:var(--accent);color:var(--on-accent);border:0;border-radius:99px;padding:8px 16px;font:700 .85rem var(--body);margin-top:10px;cursor:pointer}
+.cp:hover{filter:brightness(1.1)}
+.cp:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.cp.ok{background:var(--gold);color:#16301f}
+.addr{-webkit-user-select:all;user-select:all}
+
+.grp{margin-top:26px}
+.grp>h3{font-size:1.35rem;color:var(--spruce2)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .grp>h3{color:var(--gold)}}
+:root[data-theme="dark"] .grp>h3{color:var(--gold)}
+.grp>p{margin:3px 0 12px;color:var(--mute);font-size:.94rem;max-width:62ch}
+.ideas{display:grid;gap:10px}
+.idea{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;min-width:0}
+.idea h4{margin:0;font:400 1.15rem/1.25 var(--display)}
+.idea p{margin:5px 0 0;color:var(--mute);font-size:.95rem}
+.idea a{white-space:nowrap}
+.idea.pick{border:2px solid var(--gold);background:var(--tint)}
+
+.floor{margin-top:18px}
+.floor>h3{font:700 .74rem/1 var(--body);text-transform:uppercase;letter-spacing:.12em;color:var(--mute);margin-bottom:9px}
+.rooms{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(168px,1fr))}
+.room{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;min-width:0}
+.room .no{font:400 1.5rem/1 var(--display);color:var(--spruce2)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .room .no{color:var(--accent)}}
+:root[data-theme="dark"] .room .no{color:var(--accent)}
+.room .bed{font:700 .7rem/1.3 var(--body);text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin-top:5px}
+.room .nm{font-weight:700;margin-top:7px}
+.room.util{background:transparent;border-style:dashed}
+.room.util .nm{font-weight:400;color:var(--mute);font-size:.92rem}
+/* shopping */
+.gate{max-width:420px}
+.gate input{margin-bottom:10px}
+.shopbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.filt{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:7px 16px;font:500 .9rem var(--body);cursor:pointer}
+.filt.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:700}
+.tally{margin-left:auto;font:700 .88rem var(--body);color:var(--cran)}
+.addrow{display:flex;gap:8px;margin-bottom:16px}
+.addrow input{flex:1;min-width:0}
+.addrow button{flex:none}
+.items{display:grid;gap:10px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-width:0}
+.item.done{opacity:.62}
+.item .top{display:flex;align-items:flex-start;gap:10px}
+.item .nm{flex:1;min-width:0;font:400 1.15rem/1.3 var(--display);word-break:break-word}
+.item.done .nm{text-decoration:line-through}
+.item .x{flex:none;background:none;border:0;color:var(--mute);font-size:1.2rem;line-height:1;padding:2px 6px;border-radius:8px;cursor:pointer}
+.item .x:hover{color:var(--cran);background:var(--tint)}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.pill2{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:99px;padding:5px 12px;font:600 .78rem var(--body);cursor:pointer}
+.pill2.on{background:var(--spruce2);color:#fff;border-color:var(--spruce2)}
+.pill2.on.s3{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:10px}
+.meta input,.meta select{font:inherit;font-size:.9rem;padding:8px 10px}
+.sync{font-size:.8rem;color:var(--mute);margin-top:12px}
+.warn{background:var(--tint);border:1px solid var(--cran);color:var(--ink);border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:.92rem}
+.jobs{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.job{display:flex;align-items:flex-start;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+.job .mark{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:.72rem;line-height:1;margin-top:2px;color:var(--on-accent)}
+.job.done .mark{background:var(--accent)}
+.job.done span{text-decoration:line-through;color:var(--mute)}
+
+footer{background:var(--spruce);color:var(--hero-ink);text-align:center;padding-block:28px;font-family:var(--display);font-size:1.3rem}
+footer small{display:block;font:400 .85rem var(--body);opacity:.75;margin-top:4px}
+
+@media (max-width:420px){.day{grid-template-columns:62px 1fr;gap:12px;padding:12px 14px}.d b{font-size:1.8rem}.card{padding:16px 18px}}
+@media (prefers-reduced-motion:reduce){.bulb{animation:none}html{scroll-behavior:auto}
+.ticker-in{animation:none;width:auto;flex-wrap:wrap;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.ticker i{white-space:normal}}
+</style>
+
+<header class="hero">
+  <canvas id="snow" aria-hidden="true"></canvas>
+  <div class="lights" id="lights" aria-hidden="true"></div>
+  <div class="wrap">
+    <span class="tag">Family Christmas week</span>
+    <h1>Christmas in <em>Cornwall</em></h1>
+    <p class="sub">The Hatch, Crantock. Seven nights, one big house, the whole lot of us.</p>
+    <div class="count" id="count"><b id="cn">25</b><span id="cl">December · Christmas Day</span></div>
+  </div>
+  <div class="hill"></div>
+</header>
+
+<div class="stick">
+<nav><div class="wrap"><a href="#stay">Where</a><a href="#rooms">Rooms</a><a href="#plan">The week</a><a href="#shopping">Shopping</a><a href="#ideas">Ideas</a><a href="#jobs">To sort</a></div></nav>
+<div class="ticker" aria-label="Still to sort"><div class="ticker-in" id="tin"></div></div>
+</div>
+
+<main class="wrap">
+<section id="stay">
+  <h2>Where we're staying</h2>
+  <div class="rule"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1l2.4 7.2L22 9l-6 4.6L18 21l-6-4.2L6 21l2-7.4L2 9l7.6-.8z"/></svg></div>
+  <div class="grid">
+    <div class="card"><div class="k">The house</div><p><strong>The Hatch</strong></p><p class="addr" id="addrText">Beach Road, Crantock<br>Newquay, Cornwall, TR8 5RE</p><button class="cp" id="cpAddr" type="button">Copy address</button><p class="who">About ten minutes from Newquay. Booked through Unique Homestays.</p><p style="margin-top:10px"><a href="https://www.uniquehomestays.com/self-catering/uk/cornwall/crantock/the-hatch/" target="_blank" rel="noopener">See the house &rsaquo;</a></p></div>
+    <div class="card"><div class="k">Arrive &amp; leave</div><p><strong>In:</strong> Monday 21 Dec, from 4:00pm</p><p><strong>Out:</strong> Monday 28 Dec, by 10:00am</p><p class="who">Seven nights. Directions and the key arrangements come through from the agency nearer the time.</p></div>
+    <div class="card"><div class="k">Beds</div><p>Five bedrooms, and the booking is for <strong>nine guests maximum</strong>.</p><p class="who">One bedroom and a wet room with hand rails are on the ground floor. Who sleeps where has to go to the owners before we arrive.</p></div>
+    <div class="card"><div class="k">What's there</div><ul><li>Hot tub</li><li>Cinema room with Netflix</li><li>Games room, table tennis, darts</li><li>Real fire, logs provided</li><li>Enclosed garden and conservatory</li><li>Wi-Fi, Sonos, Nespresso, EV charger</li></ul></div>
+    <div class="card"><div class="k">Kids &amp; dogs</div><p>Children are very welcome, and there's a cot, a travel cot and a highchair.</p><p>One dog is booked in. Two are allowed, three if we ask in advance. The garden is enclosed, but they still need watching out there.</p></div>
+    <div class="card"><div class="k">On the doorstep</div><p>The Old Albion is 0.1 miles away, with food and live music.</p><p>There's a village store in Crantock. The beach is a short walk and the coast path about eight minutes.</p></div>
+  </div>
+</section>
+
+<section id="rooms">
+  <h2>Who's where</h2>
+  <p class="lede">Nine of us, five rooms. Rooms 1 and 2 are zip-and-link, so they're being made up as super kings rather than twins.</p>
+  <div class="floor">
+    <h3>Ground floor</h3>
+    <div class="rooms">
+      <div class="room"><div class="no">1</div><div class="bed">Super king</div><div class="nm">Mum &amp; Dad</div></div>
+      <div class="room util"><div class="no">&middot;</div><div class="bed">Wet room</div><div class="nm">Shower, WC, hand rails</div></div>
+    </div>
+  </div>
+  <div class="floor">
+    <h3>First floor</h3>
+    <div class="rooms">
+      <div class="room"><div class="no">2</div><div class="bed">Super king &middot; en suite WC &middot; cot</div><div class="nm">Luke &amp; Emily</div></div>
+      <div class="room"><div class="no">3</div><div class="bed">Single</div><div class="nm">Dan</div></div>
+      <div class="room"><div class="no">4</div><div class="bed">Twin &middot; en suite WC</div><div class="nm">Amara &amp; Maddi</div></div>
+      <div class="room"><div class="no">5</div><div class="bed">Double &middot; bath &amp; shower</div><div class="nm">Matt &amp; Karen</div></div>
+      <div class="room util"><div class="no">&middot;</div><div class="bed">Family shower room</div><div class="nm">Across the hall</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="plan">
+  <h2>The week</h2>
+  <p class="lede">Monday 21st to Monday 28th December. Nothing is set in stone, and the ideas below are what we're still deciding.</p>
+  <div class="days" id="sched"></div>
+</section>
+
+<section id="shopping">
+  <h2>Shopping</h2>
+  <p class="lede">Everything we need at the house. Anyone can add things, change a status or tick something off — it updates for everyone.</p>
+  <div class="warn"><strong>Deliveries:</strong> we can't get in until 4pm on Monday 21st, so nothing should be delivered that day. Fortnum &amp; Mason is set for Tuesday 22nd — but that's the Eden Project day, so someone needs to stay at the house.</div>
+  <div id="shop-area"><div class="note">Loading…</div></div>
+</section>
+
+<section id="ideas">
+  <h2>Ideas</h2>
+  <p class="lede">Everything we've found that's worth doing. <strong>Tell Luke what you fancy</strong> — WhatsApp him and he'll put the names up here, so we can see where everyone lands before anything gets booked.</p>
+  <div id="idea-area"></div>
+</section>
+
+<section id="jobs">
+  <h2>Still to sort</h2>
+  <p class="lede">The jobs with a deadline on them. These are the ones rolling along the red banner at the top.</p>
+  <ul class="jobs" id="job-area"></ul>
+</section>
+</main>
+
+<footer>Merry Christmas<small>See you all in Crantock</small></footer>
+
+<script>
+/* ---------- copy address ---------- */
+(function(){
+  var b=document.getElementById("cpAddr");if(!b)return;
+  var ADDR="The Hatch, Beach Road, Crantock, Newquay, Cornwall, TR8 5RE";
+  var t;
+  function flash(msg){b.textContent=msg;b.classList.add("ok");clearTimeout(t);t=setTimeout(function(){b.textContent="Copy address";b.classList.remove("ok")},2000)}
+  b.addEventListener("click",function(){
+    var done=function(){flash("Copied")};
+    var fail=function(){
+      try{
+        var r=document.createRange();r.selectNodeContents(document.getElementById("addrText"));
+        var s=window.getSelection();s.removeAllRanges();s.addRange(r);
+        flash("Selected — press copy");
+      }catch(e){flash("Copy it by hand")}
+    };
+    try{
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(ADDR).then(done,fail)}
+      else fail();
+    }catch(e){fail()}
+  });
+})();
+
+/* ---------- decoration ---------- */
+(function(){
+  var el=document.getElementById("lights"),n=Math.max(14,Math.floor((window.innerWidth||400)/38)),h="";
+  for(var i=0;i<n;i++)h+='<i class="bulb b'+(i%4)+'" style="animation-delay:'+((i*0.37)%2.6).toFixed(2)+'s"></i>';
+  el.innerHTML=h;
+})();
+
+(function(){
+  var now=new Date(),t0=new Date(now.getFullYear(),now.getMonth(),now.getDate()),xm=new Date(now.getFullYear(),11,25);
+  var d=Math.round((xm-t0)/864e5),cn=document.getElementById("cn"),cl=document.getElementById("cl");
+  if(d>1){cn.textContent=d;cl.textContent="sleeps until Christmas Day"}
+  else if(d===1){cn.textContent="1";cl.textContent="sleep until Christmas Day"}
+  else if(d===0){cn.textContent="Today";cl.textContent="is Christmas Day"}
+  else document.getElementById("count").hidden=true;
+})();
+
+(function(){
+  var c=document.getElementById("snow"),x=c.getContext("2d"),f=[],w=0,h=0,dpr=Math.min(window.devicePixelRatio||1,2);
+  var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function size(){var r=c.getBoundingClientRect();w=r.width;h=r.height;c.width=w*dpr;c.height=h*dpr;x.setTransform(dpr,0,0,dpr,0,0)}
+  function seed(){f=[];var n=Math.round(Math.min(90,w/9));for(var i=0;i<n;i++)f.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*2.2+.8,s:Math.random()*.6+.25,p:Math.random()*6.28})}
+  function draw(){x.clearRect(0,0,w,h);x.fillStyle="#ffffff";
+    for(var i=0;i<f.length;i++){var a=f[i];x.globalAlpha=.4+a.r/5;x.beginPath();x.arc(a.x,a.y,a.r,0,6.283);x.fill()}x.globalAlpha=1}
+  function tick(t){for(var i=0;i<f.length;i++){var a=f[i];a.y+=a.s;a.x+=Math.sin(t/1600+a.p)*.3;if(a.y>h+4){a.y=-4;a.x=Math.random()*w}}draw();requestAnimationFrame(tick)}
+  size();seed();draw();
+  window.addEventListener("resize",function(){size();seed();draw()});
+  if(!reduce)requestAnimationFrame(tick);
+})();
+
+/* ---------- the week ---------- */
+var DAYS=[
+ ["Mon","21","Arrivals","Doors open at 4pm. Food shop, a first look at the beach, and dinner at the house."],
+ ["Tue","22","Eden Project","Christmas in the biomes, Father Christmas, ice skating, and the lights after 4pm. About 35–45 minutes away. <a href='https://www.edenproject.com/visit/whats-on/christmas-at-the-eden-project' target='_blank' rel='noopener'>What's on</a>","","Book soon"],
+ ["Wed","23","Truro","The Christmas market runs until 9pm, then the Festival of Nine Lessons and Carols at the cathedral, where the service began. 25–35 minutes. <a href='https://www.trurochristmas.co.uk/' target='_blank' rel='noopener'>Market</a> &middot; <a href='https://www.trurocathedral.org.uk/history/nine-lessons-and-carols' target='_blank' rel='noopener'>Carols</a>","","Tickets TBC"],
+ ["Thu","24","Christmas Eve","Panto in Truro, Dick Whittington &amp; His Mousehole Cat at 11am or 3pm. Or we keep the day local with a beach walk and a pub lunch. Still to settle.","eve"],
+ ["Fri","25","Christmas Day","The house, far too much food, and a long beach walk. There's a traditional sea swim at Watergate Bay around midday for anyone brave enough, and hot drinks for everyone watching.","xmas"],
+ ["Sat","26","Heligan Night Garden","A mile of illuminated trail through the Lost Gardens, with giant lanterns, tunnels of light, fire pits, marshmallows and mulled wine. 40–50 minutes. <a href='https://www.heligan.com/events-at-heligan/heligan-night-garden/' target='_blank' rel='noopener'>Tickets</a>","","Book soon"],
+ ["Sun","27","Lunch at St Enodoc","Paul Ainsworth's hotel in Rock, across the estuary from Padstow, about 45 minutes. He relaunched it this summer, so it will go quickly. Bookings by phone only, on 01208 863394.","","Ring them"],
+ ["Mon","28","Departures","Out by 10am, so most of the packing happens the night before."]
+];
+document.getElementById("sched").innerHTML=DAYS.map(function(d){
+  var badge=d[4]==="xmas"?'<span class="flag">The big day</span>':(d[5]?'<span class="flag book">'+d[5]+'</span>':"");
+  return '<div class="day'+(d[4]?" "+d[4]:"")+'"><div class="d"><b>'+d[1]+'</b><span>'+d[0]+' Dec</span></div><div><h3>'+d[2]+badge+'</h3><p>'+d[3]+'</p></div></div>';
+}).join("");
+
+/* ---------- ideas ----------
+   Add a "who" line to any idea as votes come in, e.g. who:"Dave, Sarah, Mum" */
+var GROUPS=[
+ ["Big calls","These three would change the shape of the week, so they need a proper show of hands.",[
+   {t:"Give the 23rd to Mousehole instead of Truro",n:"Tom Bawcock's Eve falls on the 23rd and only the 23rd, and the harbour lights are already up. It's a long drive, 75 minutes each way, and a late night for the little ones.",pick:1},
+   {t:"Do all of Truro on Christmas Eve instead",n:"The market runs right up to Christmas Eve, the panto is in Truro at 11am, and the cathedral carols are on both the 23rd and the 24th. One town, one day — and it frees up the 23rd for Mousehole.",pick:1},
+   {t:"Boxing Day: swim in the morning, Heligan in the evening",n:"The Perranporth swim is at 10:30 and Heligan doesn't open until 4:15pm, so both fit in the same day without a rush.",pick:1}
+ ]],
+ ["Festive outings","The kitsch and the genuinely odd.",[
+   {t:"Tom Bawcock's Eve, Mousehole",n:"23 December. A lantern procession round the harbour, stargazy pie with the fish heads poking through the crust, and the harbour lights lit. About 75 minutes each way, but it's the most gloriously odd night in the Cornish calendar.",u:"https://www.cornwallforever.co.uk/year/tom-bawcocks-eve"},
+   {t:"Mousehole harbour lights",n:"Lights strung right round the harbour, on through our whole week. 70 to 80 minutes each way, so an evening out rather than a pop over. Pairs neatly with Tom Bawcock's Eve.",u:"https://www.mouseholelights.org.uk/"},
+   {t:"Christmas Eve panto in Truro",n:"Dick Whittington and His Mousehole Cat at Hall for Cornwall, 11am or 3pm, about two hours. Thoroughly silly and thoroughly Cornish.",u:"https://www.hallforcornwall.co.uk/whats-on/dickwhittington/"},
+   {t:"Santa by steam, Bodmin and Wenford",n:"Heritage steam train with Father Christmas aboard, roughly 35 minutes away. The 2026 dates weren't out when we looked, so worth a check if the little ones would love it."},
+   {t:"Montol, Penzance",n:"21 December, the solstice. Masked guise dancers, fire, a mummers play and a torchlit procession at 6pm. It falls on our arrival day and is 80 minutes away, so realistically one for another year.",u:"https://montolfestival.co.uk"}
+ ]],
+ ["Carols","Both need a phone call, because neither publishes dates.",[
+   {t:"Carols at Crantock church",n:"St Carantoc's is a five-minute walk from the house. Service dates aren't published online, so someone should ring the church. Hard to beat for the full Christmas-film effect."},
+   {t:"Carols on the Platt, Port Isaac",n:"Half the village singing on the harbour front, Fisherman's Friends included. About 45 minutes away. Dates tend to go up late."}
+ ]],
+ ["Sea and sand","Bracing.",[
+   {t:"Perranporth Boxing Day swim",n:"10:30 on Boxing Day, no wetsuits. The biggest of the Cornish Christmas swims and only about 15 minutes from the house. Spectators with flasks very welcome."},
+   {t:"Christmas Day swim at Watergate Bay",n:"Around midday on Christmas Day, ten minutes up the coast. For the brave, or for the rest of us to watch and jeer."},
+   {t:"Beach walks, weather permitting",n:"Watergate Bay, Crantock and the Gannel, Holywell Bay, Fistral and Pentire Head, or further out to Padstow and Port Isaac. Decide on the morning by what the sky is doing."}
+ ]],
+ ["Pubs and lunches","Sunday is St Enodoc. These are everything else, nearest first.",[
+   {t:"The Bowgie Inn",n:"Straight above Crantock Beach, with a children's menu and gluten-free options. The easy one when nobody can face a drive.",u:"https://www.bowgie.com/"},
+   {t:"Smugglers Den Inn",n:"Thatched sixteenth-century pub near Cubert, 15 to 20 minutes. Relaxed and good with children.",u:"https://www.thesmugglersden.co.uk/"},
+   {t:"Lewinnick Lodge",n:"Cliff-top pub with big sea views, 10 to 20 minutes away.",u:"https://lewinnicklodge.co.uk/eat/menus/"},
+   {t:"The Plume of Feathers",n:"Country pub near Newquay and a solid Sunday roast, 15 to 20 minutes.",u:"https://theplumemitchell.co.uk/"},
+   {t:"The Tartan Fox",n:"Michelin-listed country pub 15 to 25 minutes away. Knocked off Sunday by St Enodoc, so this could be the Christmas Eve lunch instead.",u:"https://www.tartanfoxpub.co.uk/"},
+   {t:"St Kew Inn",n:"Fifteenth-century pub with open fires and very good food, 40 to 50 minutes. Could be combined with Port Isaac.",u:"https://www.stkewinn.co.uk/"}
+ ]]
+];
+document.getElementById("idea-area").innerHTML=GROUPS.map(function(g){
+  var cards=g[2].map(function(i){
+    var link=i.u?' <a href="'+i.u+'" target="_blank" rel="noopener">Details &rsaquo;</a>':"";
+    var who=i.who?'<p class="who"><b>Up for it:</b> '+i.who+'</p>':"";
+    return '<div class="idea'+(i.pick?" pick":"")+'"><h4>'+i.t+'</h4><p>'+i.n+link+'</p>'+who+'</div>';
+  }).join("");
+  return '<div class="grp"><h3>'+g[0]+'</h3><p>'+g[1]+'</p><div class="ideas">'+cards+'</div></div>';
+}).join("");
+
+/* ---------- jobs + banner ---------- */
+var JOBS=[
+ {t:"Ring St Enodoc on 01208 863394 about Sunday the 27th",d:false},
+ {t:"Book the Eden Project for the 22nd — admission, Father Christmas and skating are all separate tickets",d:false},
+ {t:"Book Heligan Night Garden for Boxing Day — slots start at 4:15pm",d:false},
+ {t:"Book panto tickets for Christmas Eve — 11am or 3pm",d:false},
+ {t:"Truro Cathedral carols: the 2026 tickets aren't out yet, so keep checking",d:false},
+ {t:"Ring Crantock church about the carol service",d:false},
+ {t:"Bedroom list and guest names go to the owners before we arrive",d:false},
+ {t:"Everyone to tell Luke which ideas they fancy",d:false}
+];
+document.getElementById("job-area").innerHTML=JOBS.map(function(j){
+  return '<li class="job'+(j.d?" done":"")+'"><span class="mark">'+(j.d?"&#10003;":"")+'</span><span>'+j.t+'</span></li>';
+}).join("");
+(function(){
+  var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var open=JOBS.filter(function(j){return !j.d}).map(function(j){return j.t});
+  if(!open.length)open=["Everything on the list is sorted. See you in Crantock."];
+  var h=open.map(function(j){return '<i>'+j+'</i>'}).join("");
+  document.getElementById("tin").innerHTML=reduce?h:h+h;
+})();
+
+/* ---------- shopping list ---------- */
+var SUPA_URL="https://uarnkmukrmilcrsxcyvz.supabase.co";
+var SUPA_KEY="sb_publishable_H8EzjJz5Aiu0Bk_QYI8Qcg_2zyqGnQg";
+var FAMILY_CODE="hatch2026";
+
+var STATUS=[["to_buy","To buy"],["ordered","Ordered"],["bringing","Being brought"],["arrived","Arrived"]];
+var ARRIVING=[["","How?"],["delivery","Delivery"],["family","Brought by family"],["local","Buy locally"]];
+
+var shopArea=document.getElementById("shop-area");
+var items=[],filter="all",unlocked=false,poll=null,lastErr="";
+
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+
+function api(path,opts){
+  opts=opts||{};
+  opts.headers=Object.assign({
+    "apikey":SUPA_KEY,
+    "Authorization":"Bearer "+SUPA_KEY,
+    "Content-Type":"application/json",
+    "Prefer":opts.prefer||"return=minimal"
+  },opts.headers||{});
+  return fetch(SUPA_URL+"/rest/v1/"+path,opts);
+}
+
+async function load(){
+  try{
+    var r=await api("shopping_items?select=*&order=created_at.asc",{method:"GET",prefer:"count=none"});
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    items=await r.json();lastErr="";
+  }catch(e){lastErr="Can't reach the list right now. It'll retry."}
+  renderShop();
+}
+
+async function addItem(name){
+  var n=name.trim();if(!n)return;
+  if(items.some(function(i){return (i.name||"").trim().toLowerCase()===n.toLowerCase()})){
+    lastErr="“"+n+"” is already on the list.";renderShop();return;
+  }
+  var tmp={id:"tmp"+Date.now(),name:n,status:"to_buy",arriving:"",due_date:null,who:"",notes:""};
+  items.push(tmp);renderShop();
+  try{await api("shopping_items",{method:"POST",body:JSON.stringify({name:n,status:"to_buy"})})}catch(e){}
+  load();
+}
+async function patch(id,field,value){
+  var it=items.find(function(i){return i.id===id});if(it)it[field]=value;
+  renderShop();
+  var body={};body[field]=value===""?null:value;
+  try{await api("shopping_items?id=eq."+encodeURIComponent(id),{method:"PATCH",body:JSON.stringify(body)})}catch(e){}
+  load();
+}
+async function removeItem(id){
+  items=items.filter(function(i){return i.id!==id});renderShop();
+  try{await api("shopping_items?id=eq."+encodeURIComponent(id),{method:"DELETE"})}catch(e){}
+  load();
+}
+
+function renderGate(){
+  shopArea.innerHTML='<form id="gf" class="gate"><p class="lede">Enter the family code to use the shopping list. You only need to do this once on each phone.</p>'+
+    '<input id="gc" type="text" inputmode="text" autocomplete="off" placeholder="Family code" required><button class="go">Unlock</button></form>';
+  document.getElementById("gf").onsubmit=function(e){
+    e.preventDefault();
+    var v=document.getElementById("gc").value.trim();
+    if(v.toLowerCase()===FAMILY_CODE.toLowerCase()){lsSet("hatchCode",v);unlocked=true;start()}
+    else{document.getElementById("gc").value="";document.getElementById("gc").placeholder="Not right — try again"}
+  };
+}
+
+function renderShop(){
+  if(!unlocked)return;
+  var a=document.activeElement;
+  if(a&&a.closest&&a.closest("#shopping")&&(a.tagName==="INPUT"||a.tagName==="SELECT"))return;
+  var shown=items.filter(function(i){
+    if(filter==="tobuy")return i.status==="to_buy";
+    if(filter==="sorted")return i.status==="arrived";
+    return true;
+  });
+  var outstanding=items.filter(function(i){return i.status!=="arrived"}).length;
+  var f=function(k,l){return '<button class="filt'+(filter===k?" on":"")+'" data-f="'+k+'">'+l+'</button>'};
+  var rows=shown.map(function(i){
+    var st=STATUS.map(function(s){
+      return '<button class="pill2'+(i.status===s[0]?" on"+(s[0]==="arrived"?" s3":""):"")+'" data-id="'+esc(i.id)+'" data-st="'+s[0]+'">'+s[1]+'</button>';
+    }).join("");
+    var arr=ARRIVING.map(function(o){
+      return '<option value="'+o[0]+'"'+((i.arriving||"")===o[0]?" selected":"")+'>'+o[1]+'</option>';
+    }).join("");
+    return '<div class="item'+(i.status==="arrived"?" done":"")+'">'+
+      '<div class="top"><div class="nm">'+esc(i.name||"")+'</div>'+
+      '<button class="x" data-del="'+esc(i.id)+'" aria-label="Remove">&times;</button></div>'+
+      '<div class="pills">'+st+'</div>'+
+      '<div class="meta">'+
+        '<select data-id="'+esc(i.id)+'" data-fld="arriving">'+arr+'</select>'+
+        '<input type="date" data-id="'+esc(i.id)+'" data-fld="due_date" value="'+esc(i.due_date||"")+'">'+
+        '<input type="text" data-id="'+esc(i.id)+'" data-fld="who" placeholder="Who?" value="'+esc(i.who||"")+'" maxlength="40">'+
+        '<input type="text" data-id="'+esc(i.id)+'" data-fld="notes" placeholder="Notes" value="'+esc(i.notes||"")+'" maxlength="140">'+
+      '</div></div>';
+  }).join("");
+  shopArea.innerHTML=
+    (lastErr?'<div class="warn">'+esc(lastErr)+'</div>':"")+
+    '<form class="addrow" id="af"><input id="ai" placeholder="Add something… e.g. Champagne" maxlength="80" required autocomplete="off"><button class="go">Add</button></form>'+
+    '<div class="shopbar">'+f("all","All")+f("tobuy","To buy")+f("sorted","Sorted")+
+      '<span class="tally">'+outstanding+' still to sort</span></div>'+
+    '<div class="items">'+(rows||'<div class="note">Nothing on the list yet.</div>')+'</div>'+
+    '<p class="sync">Updates for everyone automatically.</p>';
+
+  document.getElementById("af").onsubmit=function(e){
+    e.preventDefault();var v=document.getElementById("ai").value;
+    document.getElementById("ai").value="";lastErr="";addItem(v);
+  };
+  shopArea.querySelectorAll(".filt").forEach(function(b){b.onclick=function(){filter=b.dataset.f;renderShop()}});
+  shopArea.querySelectorAll(".pill2").forEach(function(b){b.onclick=function(){patch(b.dataset.id,"status",b.dataset.st)}});
+  shopArea.querySelectorAll(".x").forEach(function(b){b.onclick=function(){removeItem(b.dataset.del)}});
+  shopArea.querySelectorAll("[data-fld]").forEach(function(el){
+    el.onchange=function(){patch(el.dataset.id,el.dataset.fld,el.value)};
+  });
+}
+
+function start(){
+  unlocked=true;load();
+  if(poll)clearInterval(poll);
+  poll=setInterval(function(){if(!document.hidden)load()},4000);
+}
+
+(function(){
+  if(SUPA_URL.indexOf("__")===0){shopArea.innerHTML='<div class="note">Shopping list not connected yet.</div>';return}
+  if((lsGet("hatchCode")||"").toLowerCase()===FAMILY_CODE.toLowerCase())start();
+  else renderGate();
+})();
+</script>
